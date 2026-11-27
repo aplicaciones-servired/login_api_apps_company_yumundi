@@ -1,4 +1,4 @@
-import { ArrowUpCircleIcon, LayoutDashboardIcon, UsersIcon, } from 'lucide-react'
+import { LayoutDashboardIcon, ShieldCheck, UsersIcon } from 'lucide-react'
 import { ComponentProps } from 'react'
 
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from '@/components/ui/sidebar'
@@ -26,10 +26,15 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <header className='flex items-center gap-2'>
-              <ArrowUpCircleIcon className='h-5 w-5' />
-              <span className='text-base font-semibold'>Gane Multired - Servired</span>
-            </header>
+            <div className='flex items-center gap-3 px-2 py-1.5'>
+              <div className='flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs'>
+                <ShieldCheck className='size-4' />
+              </div>
+              <div className='grid text-left leading-tight'>
+                <span className='truncate text-sm font-semibold'>Gane Multired · Servired</span>
+                <span className='truncate text-xs text-muted-foreground'>Gestión de accesos</span>
+              </div>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

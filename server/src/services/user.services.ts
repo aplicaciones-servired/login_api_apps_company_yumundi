@@ -11,7 +11,7 @@ const canManageUsers = (user: User | null): boolean => {
   const { process, sub_process } = user.dataValues;
   return (
     String(sub_process) === String(SubProcess.Director_Tecnologia) ||
-    String(process) === String(Process.Financiero)
+    String(process) === String(Process.Desarrollo_Informatíco)
   );
 };
 
@@ -27,7 +27,7 @@ export const registerUserServices = async (user: UserType, document: number) => 
     where: { document }
   })
 
-  if (!canManageUsers(creator)) throw new Error('Solo el Director de Tecnología o el proceso Financiero pueden crear nuevos usuarios');
+  if (!canManageUsers(creator)) throw new Error('Solo el Director de Tecnología o el proceso Desarrollo Informático pueden crear nuevos usuarios');
   if (user.sub_process === SubProcess.Director_Tecnologia) throw new Error('Ya existe un super usuario (Director Tecnología)')
 
   const username = generateUsername(user.document.toString());
@@ -92,7 +92,7 @@ export const updateState = async (id: string, newState: string, document: number
     where: { document }
   })
 
-  if (!canManageUsers(updateAdm)) throw new Error('Solo el Director de Tecnología o el proceso Financiero pueden cambiar estado');
+  if (!canManageUsers(updateAdm)) throw new Error('Solo el Director de Tecnología o el proceso Desarrollo Informático pueden cambiar estado');
 
   const userUpdate = await User.update({ state }, { where: { id } })
 
@@ -115,7 +115,7 @@ export const updateUserServices = async (id: string, user: UserUpdateType, docum
   });
 
   if (!canManageUsers(editor)) {
-    throw new Error('Solo el Director de Tecnología o el proceso Financiero pueden editar usuarios');
+    throw new Error('Solo el Director de Tecnología o el proceso Desarrollo Informático pueden editar usuarios');
   }
 
   const existingUser = await User.findByPk(id);

@@ -15,14 +15,17 @@ export function NavMain({ items }: {
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <NavLink 
-                to={item.url}
-                className={({ isActive }) => `${isActive ? ' text-blue-500 font-semibold' : 'text-gray-700'}`}
-                >
-                <SidebarMenuButton tooltip={item.title}>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
-                </SidebarMenuButton>
+              <NavLink to={item.url} end={item.url === '/'} className='block'>
+                {({ isActive }) => (
+                  <SidebarMenuButton
+                    isActive={isActive}
+                    tooltip={item.title}
+                    className='cursor-pointer transition-colors'
+                  >
+                    {item.icon && <item.icon />}
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                )}
               </NavLink>
             </SidebarMenuItem>
           ))}

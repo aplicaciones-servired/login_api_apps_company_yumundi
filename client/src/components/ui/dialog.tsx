@@ -8,8 +8,8 @@ function Dialog({ ...props }: ComponentProps<typeof Root>) {
   return <Root data-slot='dialog' {...props} />
 }
 
-function DialogTrigger({ ...props }: ComponentProps<typeof Trigger>) {
-  return <Trigger data-slot='dialog-trigger' {...props} className='rounded-md px-2 py-1 flex items-center gap-2 cursor-pointer border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50' />
+function DialogTrigger({ className, ...props }: ComponentProps<typeof Trigger>) {
+  return <Trigger data-slot='dialog-trigger' className={className} {...props} />
 }
 
 function DialogPortal({ ...props }: ComponentProps<typeof Portal>) {

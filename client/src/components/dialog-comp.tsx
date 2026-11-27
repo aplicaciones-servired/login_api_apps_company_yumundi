@@ -1,7 +1,8 @@
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/ui/loading';
 import { lazy, Suspense, useState } from 'react';
-import { PlusIcon } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 
 const LazyDialogContent = lazy(() => import('@/components/dialog-content'));
 
@@ -14,9 +15,11 @@ export const DialogUserCreate = ({ reload }: { reload: () => void }) => {
 
   return (
     <Dialog onOpenChange={v => handleOpenChange(v)} open={isOpen}>
-      <DialogTrigger>
-        <PlusIcon className="size-4" />
-        Crear Nuevo Usuario
+      <DialogTrigger asChild>
+        <Button>
+          <UserPlus className='size-4' />
+          Crear Usuario
+        </Button>
       </DialogTrigger>
       {isOpen && (
         <Suspense fallback={<Loading />}>

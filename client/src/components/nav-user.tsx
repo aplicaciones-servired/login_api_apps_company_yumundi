@@ -1,13 +1,14 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { formatEnumLabel, getInitials } from '@/lib/formatters'
 import { LogOutIcon, MoreVerticalIcon } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 export function NavUser() {
   const { isMobile } = useSidebar()
-  const { logout } = useAuth()
-  const { user } = useAuth()
+  const { logout, user } = useAuth()
+  const initials = getInitials(user?.names, user?.lastnames)
 
   return (
     <SidebarMenu>
@@ -16,17 +17,17 @@ export function NavUser() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size='lg'
-              className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
+              className='cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
             >
-              <Avatar className='h-8 w-8 rounded-lg grayscale'>
-                <AvatarFallback className='rounded-lg'>
-                  {user?.names?.charAt(0).toUpperCase()}{user?.lastnames?.charAt(0).toUpperCase()}
+              <Avatar className='h-8 w-8 rounded-lg'>
+                <AvatarFallback className='rounded-lg bg-primary/10 text-primary font-semibold'>
+                  {initials}
                 </AvatarFallback>
               </Avatar>
               <div className='grid flex-1 text-left text-sm leading-tight'>
                 <span className='truncate font-medium'>{user?.names} {user?.lastnames}</span>
                 <span className='truncate text-xs text-muted-foreground capitalize'>
-                  {user?.sub_process.replace('_', ' ')}
+                  {formatEnumLabel(user?.sub_process)}
                 </span>
               </div>
               <MoreVerticalIcon className='ml-auto size-4' />
@@ -41,8 +42,8 @@ export function NavUser() {
             <DropdownMenuLabel className='p-0 font-normal'>
               <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
                 <Avatar className='h-8 w-8 rounded-lg'>
-                  <AvatarFallback className='rounded-lg'>
-                    {user?.names?.charAt(0).toUpperCase()}{user?.lastnames?.charAt(0).toUpperCase()}
+                  <AvatarFallback className='rounded-lg bg-primary/10 text-primary font-semibold'>
+                    {initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className='grid flex-1 text-left text-sm leading-tight'>
@@ -50,14 +51,14 @@ export function NavUser() {
                   <span className='truncate text-xs text-muted-foreground'>
                     {user?.email}
                   </span>
-                  <span className='truncate text-xs text-muted-foreground'>
-                    {user?.process}
+                  <span className='truncate text-xs text-muted-foreground capitalize'>
+                    {formatEnumLabel(user?.process)}
                   </span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout}>
+            <DropdownMenuItem onClick={logout} className='text-destructive focus:text-destructive'>
               <LogOutIcon />
               Cerrar Sesión
             </DropdownMenuItem>

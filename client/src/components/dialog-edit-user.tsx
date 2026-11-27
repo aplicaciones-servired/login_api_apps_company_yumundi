@@ -2,6 +2,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loading } from '@/components/ui/loading';
+import { formatCompany, formatEnumLabel } from '@/lib/formatters';
 import { OptionsCreation } from '@/types/Interfaces';
 import { UserI } from '@/types/User';
 import axios from 'axios';
@@ -42,6 +44,9 @@ const initialFormState: EditUserFormState = {
   process: '',
   sub_process: '',
 };
+
+const selectClassName =
+  'h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50';
 
 export const DialogUserEdit = ({ user, onClose, reload }: DialogUserEditProps) => {
   const [options, setOptions] = useState<OptionsCreation | null>(null);
@@ -124,7 +129,7 @@ export const DialogUserEdit = ({ user, onClose, reload }: DialogUserEditProps) =
         if (!open && !submitting) onClose();
       }}
     >
-      <DialogContent>
+      <DialogContent className='sm:max-w-xl'>
         <DialogHeader>
           <DialogTitle>Editar usuario</DialogTitle>
           <DialogDescription>
@@ -133,106 +138,115 @@ export const DialogUserEdit = ({ user, onClose, reload }: DialogUserEditProps) =
         </DialogHeader>
 
         {user && !options ? (
-          <div className='relative min-h-48'>
+          <div className='relative min-h-56'>
             <Loading />
           </div>
         ) : (
-          <section>
-            <form className='grid grid-cols-3 gap-4' onSubmit={handleSubmit}>
+          <form className='grid grid-cols-1 gap-4 sm:grid-cols-2' onSubmit={handleSubmit}>
+            <div className='space-y-1.5'>
               <Label htmlFor='edit_names_'>Nombres</Label>
               <Input
                 id='edit_names_'
                 name='names'
                 type='text'
-                className='col-span-2'
                 value={formData.names}
                 onChange={handleChange}
                 placeholder='Valeria Daniela'
               />
+            </div>
 
+            <div className='space-y-1.5'>
               <Label htmlFor='edit_lastNames_'>Apellidos</Label>
               <Input
                 id='edit_lastNames_'
                 name='lastNames'
                 type='text'
-                className='col-span-2'
                 value={formData.lastNames}
                 onChange={handleChange}
                 placeholder='Perez Muños'
               />
+            </div>
 
+            <div className='space-y-1.5'>
               <Label htmlFor='edit_document_'>N° Documento</Label>
               <Input
                 id='edit_document_'
                 name='document'
                 type='text'
-                className='col-span-2'
                 value={formData.document}
                 onChange={handleChange}
                 placeholder='1118245****'
               />
+            </div>
 
-              <Label htmlFor='edit_phone_'>N° Telefono</Label>
+            <div className='space-y-1.5'>
+              <Label htmlFor='edit_phone_'>N° Teléfono</Label>
               <Input
                 id='edit_phone_'
                 name='phone'
                 type='text'
-                className='col-span-2'
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder='320 245 67 ** **'
+                placeholder='320 245 67**'
               />
+            </div>
 
-              <Label htmlFor='edit_email_'>Correo</Label>
+            <div className='space-y-1.5 sm:col-span-2'>
+              <Label htmlFor='edit_email_'>Correo electrónico</Label>
               <Input
                 id='edit_email_'
                 name='email'
                 type='text'
-                className='col-span-2'
                 value={formData.email}
                 onChange={handleChange}
-                placeholder='example@gmail.com'
+                placeholder='usuario@empresa.com'
               />
+            </div>
 
+            <div className='space-y-1.5'>
               <Label htmlFor='edit_company_'>Empresa</Label>
               <select
                 id='edit_company_'
                 name='company'
                 value={formData.company}
                 onChange={handleChange}
-                className='border rounded-md px-2 py-1 cursor-pointer col-span-2'
+                className={selectClassName}
               >
                 <option value=''>Seleccionar Empresa</option>
                 {options?.company.map((opt) => (
                   <option value={opt.value.toString()} key={opt.value}>
-                    {opt.label.replace('Y', ' ')}
+                    {formatCompany(opt.label)}
                   </option>
                 ))}
               </select>
+            </div>
 
+            <div className='space-y-1.5'>
               <Label htmlFor='edit_process_'>Proceso</Label>
               <select
                 id='edit_process_'
                 name='process'
                 value={formData.process}
                 onChange={handleChange}
-                className='border rounded-md px-2 py-1 cursor-pointer col-span-2'
+                className={selectClassName}
               >
                 <option value=''>Seleccionar Proceso</option>
                 {options?.process.map((item) => (
                   <option key={item.value} value={item.value.toString()}>
-                    {item.label.replace('_', ' ')}
+                    {formatEnumLabel(item.label)}
                   </option>
                 ))}
               </select>
+            </div>
 
+            <div className='space-y-1.5 sm:col-span-2'>
               <Label htmlFor='edit_sub_process_'>Cargo</Label>
               <select
                 id='edit_sub_process_'
                 name='sub_process'
                 value={formData.sub_process}
                 onChange={handleChange}
-                className='border rounded-md px-2 py-1 cursor-pointer col-span-2'
+                className={`${selectClassName} capitalize`}
               >
                 <option value=''>Seleccionar Cargo</option>
                 {options?.sub_process.map((item) => (
@@ -245,26 +259,26 @@ export const DialogUserEdit = ({ user, onClose, reload }: DialogUserEditProps) =
                     }
                     className='capitalize'
                   >
-                    {item.label.replace('_', ' ')}
+                    {formatEnumLabel(item.label)}
                   </option>
                 ))}
               </select>
+            </div>
 
-              <div className='col-span-3 flex justify-end gap-2 pt-2'>
-                <Button
-                  type='button'
-                  variant='outline'
-                  onClick={onClose}
-                  disabled={submitting}
-                >
-                  Cancelar
-                </Button>
-                <Button type='submit' disabled={submitting}>
-                  {submitting ? 'Guardando...' : 'Guardar cambios'}
-                </Button>
-              </div>
-            </form>
-          </section>
+            <DialogFooter className='pt-2 sm:col-span-2'>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={onClose}
+                disabled={submitting}
+              >
+                Cancelar
+              </Button>
+              <Button type='submit' disabled={submitting}>
+                {submitting ? 'Guardando...' : 'Guardar cambios'}
+              </Button>
+            </DialogFooter>
+          </form>
         )}
       </DialogContent>
     </Dialog>
