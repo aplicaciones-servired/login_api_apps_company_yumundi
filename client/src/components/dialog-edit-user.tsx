@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loading } from '@/components/ui/loading';
+import { useAuth } from '@/hooks/useAuth';
 import { formatCompany, formatEnumLabel } from '@/lib/formatters';
 import { OptionsCreation } from '@/types/Interfaces';
 import { UserI } from '@/types/User';
@@ -49,6 +50,7 @@ const selectClassName =
   'h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50';
 
 export const DialogUserEdit = ({ user, onClose, reload }: DialogUserEditProps) => {
+  const { user: currentUser, login } = useAuth();
   const [options, setOptions] = useState<OptionsCreation | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState<EditUserFormState>(initialFormState);
@@ -104,6 +106,9 @@ export const DialogUserEdit = ({ user, onClose, reload }: DialogUserEditProps) =
     try {
       const res = await axios.put(`/user/${user.id}`, formData);
       if (res.status === 200) {
+        if (currentUser?.id === user.id) {
+          await login();
+        }
         onClose();
         reload();
         toast.success('Usuario actualizado correctamente', {

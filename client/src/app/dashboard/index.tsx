@@ -193,7 +193,7 @@ export default function Dashboard() {
             </div>
             <p className='text-sm text-muted-foreground'>
               {hasFullAccess
-                ? 'Tienes permisos completos para crear nuevos usuarios, editar su información organizacional y activar o inactivar accesos.'
+                ? 'Tienes permisos completos para crear nuevos usuarios, editar su información, activar o inactivar accesos y eliminar cuentas.'
                 : 'Puedes consultar la lista de usuarios registrados, filtrar por proceso o estado y revisar el detalle completo de cada cuenta.'}
             </p>
           </div>
@@ -214,7 +214,7 @@ export default function Dashboard() {
               Regla de permisos vigente
             </div>
             <p className='text-sm text-muted-foreground'>
-              La creación, edición y cambio de estado de cuentas está reservada exclusivamente para el proceso{' '}
+              La creación, edición, cambio de estado y eliminación de cuentas está reservada exclusivamente para el proceso{' '}
               <span className='font-medium text-foreground'>Desarrollo Informático</span> y el cargo{' '}
               <span className='font-medium text-foreground'>Director Tecnología</span>.
             </p>

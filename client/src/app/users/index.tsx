@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { DialogUserCreate } from '@/components/dialog-comp';
+import { DialogUserDelete } from '@/components/dialog-delete-user';
 import { DialogUserEdit } from '@/components/dialog-edit-user';
 import { DialogUserDetail } from '@/components/dialog-user-detail';
 import { useAuth } from '@/hooks/useAuth';
@@ -34,6 +35,7 @@ import {
   RefreshCw,
   Search,
   ShieldCheck,
+  Trash2,
   UserCheck,
   Users as UsersIcon,
   UserX,
@@ -58,6 +60,7 @@ export default function UsersPage() {
 
   const [editingUser, setEditingUser] = useState<UserI | null>(null);
   const [detailUser, setDetailUser] = useState<UserI | null>(null);
+  const [deletingUser, setDeletingUser] = useState<UserI | null>(null);
 
   const handleReload = () => {
     setReload((prev) => !prev);
@@ -480,6 +483,17 @@ export default function UsersPage() {
                                 </>
                               )}
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                              disabled={
+                                u.id === currentUser?.id ||
+                                u.sub_process === 'Director_Tecnologia'
+                              }
+                              onSelect={() => setDeletingUser(u)}
+                              className='text-destructive focus:text-destructive'
+                            >
+                              <Trash2 className='size-4' />
+                              Eliminar
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       ) : (
@@ -513,6 +527,14 @@ export default function UsersPage() {
         <DialogUserEdit
           user={editingUser}
           onClose={() => setEditingUser(null)}
+          reload={handleReload}
+        />
+      )}
+
+      {hasFullAccess && (
+        <DialogUserDelete
+          user={deletingUser}
+          onClose={() => setDeletingUser(null)}
           reload={handleReload}
         />
       )}

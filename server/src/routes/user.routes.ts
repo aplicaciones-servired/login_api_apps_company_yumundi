@@ -1,5 +1,5 @@
 import { authenticateToken } from '../middlewares/authToken';
-import { createUser, loginUser, logoutUser, UserByToken, findAllUsers, findUserById, forgotPassword, resetPassword, optionsUser, changeState, updateUser } from '../controllers/user.controllers'
+import { createUser, loginUser, logoutUser, UserByToken, findAllUsers, findUserById, forgotPassword, resetPassword, optionsUser, changeState, updateUser, deleteUser } from '../controllers/user.controllers'
 import { Router } from 'express';
 
 export const userRouter = Router();
@@ -19,6 +19,8 @@ userRouter.get('/users', authenticateToken, findAllUsers)
 userRouter.get('/user/:id', authenticateToken, findUserById)
 
 userRouter.put('/user/:id', authenticateToken, updateUser)
+
+userRouter.delete('/user/:id', authenticateToken, deleteUser)
 
 userRouter.post('/auth/forgot-password', forgotPassword)
 

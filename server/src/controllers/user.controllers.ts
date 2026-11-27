@@ -1,4 +1,4 @@
-import { findUserServices, loginUserServices, registerUserServices, findUserServicesById, forgotPasswordServices, asignTokenServices, resetPasswordService, updateState, updateUserServices } from '../services/user.services';
+import { findUserServices, loginUserServices, registerUserServices, findUserServicesById, forgotPasswordServices, asignTokenServices, resetPasswordService, updateState, updateUserServices, deleteUserServices } from '../services/user.services';
 import { JWT_SECRECT, ENTORNO, JWT_NAME_TOKEN } from '../configs/envSchema';
 import { validateUser, validateUserLogin, validateUserUpdate } from '../Schemas/UserSchema';
 import { Company, Process, State, SubProcess } from '../enum/enums';
@@ -116,6 +116,32 @@ export const updateUser = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteUser = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const document = req.user.document;
+
+  if (!id) {
+    res.status(400).json({ message: 'El id del usuario es requerido' });
+    return;
+  }
+
+  try {
+    const result = await deleteUserServices(id, document);
+    res.status(200).json({
+      message: 'Usuario eliminado correctamente',
+      document: result.document,
+    });
+    return;
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ message: error.message });
+      return;
+    }
+    res.status(500).json({ message: 'Internal server error' });
+    return;
+  }
+};
+
 export const loginUser = async (req: Request, res: Response) => {
   const { success, data, error } = await validateUserLogin(req.body);
 
@@ -172,31 +198,51 @@ export const loginUser = async (req: Request, res: Response) => {
 
 export const UserByToken = async (req: Request, res: Response) => {
   try {
-    const cookie = req.headers.cookie
+    const cookie = req.headers.cookie;
+    const token = req.cookies?.[JWT_NAME_TOKEN] || cookie?.split('=')[1];
 
-    if (!cookie) {
+    if (!token) {
       res.status(401).json({ message: 'Unauthorized: Missing or invalid token' });
       return;
     }
 
-    const token = cookie.split('=')[1];
-
+    let decoded: Awaited<ReturnType<typeof verifyToken>>;
     try {
-      const decoded = await verifyToken(token);
-      res.status(200).json(decoded);
-      return
+      decoded = await verifyToken(token);
     } catch (err) {
       if (err instanceof TokenExpiredError) {
         res.status(401).json({ message: 'Token expired' });
-        return
+        return;
       }
       res.status(401).json({ message: 'Unauthorized' });
-      return
+      return;
     }
+
+    const freshUser = await findUserServicesById(String(decoded.document));
+
+    if (!freshUser || freshUser.state === false) {
+      res.status(401).json({ message: 'Unauthorized: User not found or inactive' });
+      return;
+    }
+
+    res.status(200).json({
+      ...decoded,
+      id: freshUser.id,
+      names: freshUser.names,
+      lastnames: freshUser.lastNames,
+      document: freshUser.document,
+      username: freshUser.username,
+      email: freshUser.email,
+      company: Company[freshUser.company],
+      process: Process[freshUser.process],
+      sub_process: SubProcess[freshUser.sub_process],
+      state: State[freshUser.state === true ? 0 : 1],
+    });
+    return;
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });
-    return
+    return;
   }
 }
 

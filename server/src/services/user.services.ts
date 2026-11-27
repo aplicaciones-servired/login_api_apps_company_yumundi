@@ -181,6 +181,37 @@ export const updateUserServices = async (id: string, user: UserUpdateType, docum
   }
 }
 
+export const deleteUserServices = async (id: string, document: number) => {
+  const editor = await User.findOne({
+    attributes: ['process', 'sub_process'],
+    where: { document },
+  });
+
+  if (!canManageUsers(editor)) {
+    throw new Error('Solo el Director de Tecnología o el proceso Desarrollo Informático pueden eliminar usuarios');
+  }
+
+  const existingUser = await User.findByPk(id);
+  if (!existingUser) {
+    throw new Error('Usuario no encontrado');
+  }
+
+  if (String(existingUser.dataValues.document) === String(document)) {
+    throw new Error('No puedes eliminar tu propio usuario');
+  }
+
+  if (String(existingUser.dataValues.sub_process) === String(SubProcess.Director_Tecnologia)) {
+    throw new Error('No se puede eliminar al super usuario (Director Tecnología)');
+  }
+
+  await User.destroy({ where: { id } });
+
+  return {
+    id: existingUser.dataValues.id,
+    document: existingUser.dataValues.document,
+  };
+}
+
 export const forgotPasswordServices = async (document: number, email: string) => {
   const user = await User.findOne({ where: { document, email } });
 
