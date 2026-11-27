@@ -3,7 +3,17 @@ import { ValidationErrorItem, UniqueConstraintError } from 'sequelize';
 import { UserType, UserLoginType } from '../Schemas/UserSchema';
 import { compare, compareSync } from 'bcryptjs';
 import { ErrorMessages } from '../utils/eums';
+import { Process, SubProcess } from '../enum/enums';
 import { User } from '../model/user.model';
+
+const canManageUsers = (user: User | null): boolean => {
+  if (!user) return false;
+  const { process, sub_process } = user.dataValues;
+  return (
+    String(sub_process) === String(SubProcess.Director_Tecnologia) ||
+    String(process) === String(Process.Financiero)
+  );
+};
 
 export const registerUserServices = async (user: UserType, document: number) => {
   await User.sync();
@@ -13,12 +23,12 @@ export const registerUserServices = async (user: UserType, document: number) => 
   if (userFound) throw new Error('El usuario ya se encuentra registrado con el documento ingresado');
 
   const creator = await User.findOne({
-    attributes: ['sub_process'],
+    attributes: ['process', 'sub_process'],
     where: { document }
   })
 
-  if (creator?.dataValues.sub_process.toString() !== '100') throw new Error('Solo El Director de Tecnología puede crear nuevos usuarios');
-  if (user.sub_process === 100) throw new Error('Ya existe un super usuario (Director Tecnología)')
+  if (!canManageUsers(creator)) throw new Error('Solo el Director de Tecnología o el proceso Financiero pueden crear nuevos usuarios');
+  if (user.sub_process === SubProcess.Director_Tecnologia) throw new Error('Ya existe un super usuario (Director Tecnología)')
 
   const username = generateUsername(user.document.toString());
   const password = await generatePassword(user.document.toString());
@@ -78,11 +88,11 @@ export const updateState = async (id: string, newState: string, document: number
   const state = newState === '0' ? false : true
 
   const updateAdm = await User.findOne({
-    attributes: ['sub_process'],
+    attributes: ['process', 'sub_process'],
     where: { document }
   })
 
-  if (updateAdm?.dataValues.sub_process.toString() !== '100') throw new Error('Solo El Director de Tecnología puede cambiar estado');
+  if (!canManageUsers(updateAdm)) throw new Error('Solo el Director de Tecnología o el proceso Financiero pueden cambiar estado');
 
   const userUpdate = await User.update({ state }, { where: { id } })
 
