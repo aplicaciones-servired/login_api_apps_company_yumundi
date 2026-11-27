@@ -1,6 +1,6 @@
-import { findUserServices, loginUserServices, registerUserServices, findUserServicesById, forgotPasswordServices, asignTokenServices, resetPasswordService, updateState } from '../services/user.services';
+import { findUserServices, loginUserServices, registerUserServices, findUserServicesById, forgotPasswordServices, asignTokenServices, resetPasswordService, updateState, updateUserServices } from '../services/user.services';
 import { JWT_SECRECT, ENTORNO, JWT_NAME_TOKEN } from '../configs/envSchema';
-import { validateUser, validateUserLogin } from '../Schemas/UserSchema';
+import { validateUser, validateUserLogin, validateUserUpdate } from '../Schemas/UserSchema';
 import { Company, Process, State, SubProcess } from '../enum/enums';
 import { SendEmailRestorePassword } from '../services/nodemailer';
 import { verifyToken } from '../services/verifyToken';
@@ -69,6 +69,52 @@ export const changeState = async(req: Request, res: Response) => {
     res.status(500).json('Error al intentar actualizar el estado del usuario')
   }
 }
+
+export const updateUser = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const document = req.user.document;
+
+  if (!id) {
+    res.status(400).json({ message: 'El id del usuario es requerido' });
+    return;
+  }
+
+  const { success, data, error } = await validateUserUpdate(req.body);
+  if (!success) {
+    res.status(400).json({ message: error.issues[0].message });
+    return;
+  }
+
+  try {
+    const result = await updateUserServices(id, data, document);
+
+    const user = {
+      id: result.id,
+      document: result.document,
+      phone: result.phone,
+      names: result.names,
+      lastnames: result.lastNames,
+      username: result.username,
+      email: result.email,
+      company: Company[result.company],
+      process: Process[result.process],
+      sub_process: SubProcess[result.sub_process],
+      state: State[result.state === true ? 0 : 1],
+      createdAt: result.createdAt,
+      updatedAt: result.updatedAt,
+    };
+
+    res.status(200).json({ message: 'Usuario actualizado correctamente', user });
+    return;
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ message: error.message });
+      return;
+    }
+    res.status(500).json({ message: 'Internal server error' });
+    return;
+  }
+};
 
 export const loginUser = async (req: Request, res: Response) => {
   const { success, data, error } = await validateUserLogin(req.body);

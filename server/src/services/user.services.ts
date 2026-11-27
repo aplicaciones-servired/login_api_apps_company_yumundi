@@ -1,6 +1,6 @@
 import { comparePasswords, generatePassword, generateUsername, hashNewPassword } from '../utils/funtions';
 import { ValidationErrorItem, UniqueConstraintError } from 'sequelize';
-import { UserType, UserLoginType } from '../Schemas/UserSchema';
+import { UserType, UserLoginType, UserUpdateType } from '../Schemas/UserSchema';
 import { compare, compareSync } from 'bcryptjs';
 import { ErrorMessages } from '../utils/eums';
 import { Process, SubProcess } from '../enum/enums';
@@ -105,6 +105,79 @@ export const updateState = async (id: string, newState: string, document: number
     return findUserById.dataValues.document
   } else {
     throw new Error('No se pudo realizar el cambio de estado validar nuevamente')
+  }
+}
+
+export const updateUserServices = async (id: string, user: UserUpdateType, document: number) => {
+  const editor = await User.findOne({
+    attributes: ['process', 'sub_process'],
+    where: { document },
+  });
+
+  if (!canManageUsers(editor)) {
+    throw new Error('Solo el Director de Tecnología o el proceso Financiero pueden editar usuarios');
+  }
+
+  const existingUser = await User.findByPk(id);
+  if (!existingUser) {
+    throw new Error('Usuario no encontrado');
+  }
+
+  const isTargetDirector = String(existingUser.dataValues.sub_process) === String(SubProcess.Director_Tecnologia);
+  const isAssigningDirector = String(user.sub_process) === String(SubProcess.Director_Tecnologia);
+  if (isAssigningDirector && !isTargetDirector) {
+    throw new Error('Ya existe un super usuario (Director Tecnología)');
+  }
+
+  const updatePayload: {
+    names: string;
+    lastNames: string;
+    document: number;
+    phone: number;
+    email: string;
+    company: number;
+    process: number;
+    sub_process?: number;
+    username?: string;
+  } = {
+    names: user.names,
+    lastNames: user.lastNames,
+    document: user.document,
+    phone: user.phone,
+    email: user.email,
+    company: user.company,
+    process: user.process,
+  };
+
+  if (!(isTargetDirector && isAssigningDirector)) {
+    updatePayload.sub_process = user.sub_process;
+  }
+
+  if (
+    String(existingUser.dataValues.document) !== String(user.document) &&
+    existingUser.dataValues.username === generateUsername(String(existingUser.dataValues.document))
+  ) {
+    updatePayload.username = generateUsername(String(user.document));
+  }
+
+  try {
+    await User.update(updatePayload, { where: { id } });
+
+    const updatedUser = await User.findByPk(id, {
+      attributes: { exclude: ['password', 'password2', 'resetPasswordToken', 'resetPasswordExpires'] },
+    });
+
+    if (!updatedUser) {
+      throw new Error('Usuario actualizado no encontrado');
+    }
+
+    return updatedUser;
+  } catch (err) {
+    if (err instanceof UniqueConstraintError) {
+      const errors: ValidationErrorItem = err.errors[0];
+      throw new Error(`El campo [ ${errors.path} ] ya se encuentra registrado con valor ${errors.value}`);
+    }
+    throw err;
   }
 }
 

@@ -9,6 +9,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { DialogUserCreate } from '@/components/dialog-comp';
+import { DialogUserEdit } from '@/components/dialog-edit-user';
+import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 
 import { EllipsisVertical } from 'lucide-react';
@@ -17,8 +19,14 @@ import { toast } from 'sonner';
 import axios from 'axios';
 
 export default function UsersPage() {
+  const { user: currentUser } = useAuth();
   const [user, setUser] = useState<UserI[]>([])
   const [reload, setReload] = useState(false)
+  const [editingUser, setEditingUser] = useState<UserI | null>(null)
+
+  const canManageUsers =
+    currentUser?.sub_process === 'Director_Tecnologia' ||
+    currentUser?.process === 'Financiero';
 
   const handleReload = () => {
     setReload(!reload)
@@ -89,13 +97,18 @@ export default function UsersPage() {
                     <Badge variant={`${u.state! === 'Activo' ? 'succes' : 'danger'}`}>{u.state}</Badge>
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu>
+                    <DropdownMenu modal={false}>
                       <DropdownMenuTrigger>
                         <EllipsisVertical />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         <DropdownMenuItem disabled>Ver detallado</DropdownMenuItem>
-                        <DropdownMenuItem disabled>Editar</DropdownMenuItem>
+                        <DropdownMenuItem
+                          disabled={!canManageUsers}
+                          onSelect={() => setEditingUser(u)}
+                        >
+                          Editar
+                        </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => handleToggleState(u.id, u.state)}
                           className={`${u.state === 'Activo' ? 'text-red-400 ' : 'text-green-400'} hover:font-semibold`}>
@@ -112,6 +125,11 @@ export default function UsersPage() {
         </Table>
       </div>
 
+      <DialogUserEdit
+        user={editingUser}
+        onClose={() => setEditingUser(null)}
+        reload={handleReload}
+      />
     </section>
   )
 }

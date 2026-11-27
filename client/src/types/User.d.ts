@@ -1,5 +1,3 @@
-import { O } from "node_modules/react-router/dist/development/route-data-C12CLHiN.d.mts";
-
 export interface User {
     id: string;
     names: string;
@@ -16,6 +14,7 @@ export interface User {
 }
 
 export type UserI = Omit<User, 'iat' | 'exp'> & {
+    phone?: number;
     createdAt: string;
     updatedAt: string;
 }
